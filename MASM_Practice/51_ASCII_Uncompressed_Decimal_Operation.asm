@@ -58,6 +58,7 @@ END main
 
 ;ASCII + - * / adjust
 ;AAA  AAS  AAM  AAD
+;BCD: Binary Code Decimal
 
 ;decimal ASCII       Compress BCD   Uncompress BCD
 ;0       00110000    0000           00000000
