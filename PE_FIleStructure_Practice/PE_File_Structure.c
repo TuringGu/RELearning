@@ -1,4 +1,4 @@
-#include "57_main.h"
+#include "main.h"
 
 
 int main()
@@ -67,8 +67,25 @@ int main()
 	//ExportTables(buffer);
 
 	// Relocation Tables
-	printf("Relocation Tables======================\n");
-	RelocationTables(buffer);
+	//printf("Relocation Tables======================\n");
+	//RelocationTables(buffer);
+
+	// TLS Tables
+	//printf("TLS Tables======================\n");
+	//TLSTable(buffer);
+
+	// Delay Load Tables
+	//printf("Delay Load Table======================\n");
+	//DelayLoadTable(buffer);
+
+	// Resource Tables
+	//printf("Resource Table======================\n");
+	//ResourceTable(buffer);
+
+	// Other Tables
+	printf("Other Table======================\n");
+	DataTable(buffer);
+
 
 	// Free Memory
 	free(buffer);
@@ -271,8 +288,183 @@ void RelocationTables(char* buffer)
 
 }
 
+void TLSTable(char* buffer)
+{
+	// MS-DOS Header
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)buffer;
+	// PE Header
+	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)(pDosHeader->e_lfanew + buffer);
+	// Locate TLS tables in data directory tables
+	PIMAGE_DATA_DIRECTORY pTLSDir = (pNtHeader->OptionalHeader.DataDirectory + IMAGE_DIRECTORY_ENTRY_TLS);
+	// Filling TLS Structure
+	PIMAGE_TLS_DIRECTORY pTLS = (PIMAGE_TLS_DIRECTORY)(RvaToFileOffset(pTLSDir->VirtualAddress, buffer) + buffer);
+
+	printf("StartAddressOfRawData(VA): %08X\n",pTLS->StartAddressOfRawData);
+	printf("EndAddressOfRawData(VA): %08X\n",pTLS->EndAddressOfRawData);
+	printf("AddressOfIndex(VA): %08X\n",pTLS->AddressOfIndex);
+	printf("AddressOfCallBacks(VA): %08X\n", pTLS->AddressOfCallBacks);
+	printf("SizeOfZeroFill: %08X\n", pTLS->SizeOfZeroFill);
+	printf("Characteristics: %08X\n", pTLS->Characteristics);
+}
+
+void DelayLoadTable(char* buffer)
+{
+	// MS-DOS Header
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)buffer;
+	// PE Header
+	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)(pDosHeader->e_lfanew + buffer);
+	// Locate delay Load table in data directory tables
+	PIMAGE_DATA_DIRECTORY pDelayLoadDir = (pNtHeader->OptionalHeader.DataDirectory + IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT);
+	// Filling delay Load table structure
+	PIMAGE_DELAYLOAD_DESCRIPTOR pDelayLoad = (PIMAGE_DELAYLOAD_DESCRIPTOR)(RvaToFileOffset(pDelayLoadDir->VirtualAddress, buffer) + buffer);
+
+	while (pDelayLoad->DllNameRVA != NULL && pDelayLoadDir->VirtualAddress != 0)
+	{
+		char* szDllName = (char*)(RvaToFileOffset(pDelayLoad->DllNameRVA, buffer) + buffer);
+		printf("DLLName: %s\n", szDllName);
+		printf("Attributes: %08X\n", pDelayLoad->Attributes);
+		printf("ModuleHandleRVA: %08X\n", pDelayLoad->ModuleHandleRVA);
+		printf("ImportAddressTableRVA: %08X\n", pDelayLoad->ImportAddressTableRVA);
+		printf("ImportNameTableRVA: %08X\n", pDelayLoad->ImportNameTableRVA);
+		printf("BoundImportAddressTableRVA: %08X\n", pDelayLoad->BoundImportAddressTableRVA);
+		printf("UnloadInformationTableRVA: %08X\n", pDelayLoad->UnloadInformationTableRVA);
+		printf("TimeDateStamp: %08X\n", pDelayLoad->TimeDateStamp);
+		printf("\n");
+		pDelayLoad++;
+	}
+}
+
+void ResourceTable(char* buffer)
+{
+	// System defined resouce types
+	char* g_ResType[0x11] = {
+		"NULL","Mouse Pointer","Bitmap","Icon","Menu",
+		"Dialog Box","String List","Font Directory","Font","Shortcut Key", 
+		"Unformatted Resources", "Message List", "Mouse Pointer Group", "NULL", "Icon Group",
+		"NULL","Version Info"
+	};
+
+	// MS-DOS Header
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)buffer;
+	// PE Header
+	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)(pDosHeader->e_lfanew + buffer);
+	// Extend PE Header
+	PIMAGE_OPTIONAL_HEADER pOptHeader = (PIMAGE_OPTIONAL_HEADER)&pNtHeader->OptionalHeader;
+	// Locate Resource table in data directory tables
+	PIMAGE_DATA_DIRECTORY pResourceDir = pOptHeader->DataDirectory + IMAGE_DIRECTORY_ENTRY_RESOURCE;
+	// Filling Resource Table Structure
+	PIMAGE_RESOURCE_DIRECTORY pFirst = (PIMAGE_RESOURCE_DIRECTORY)(RvaToFileOffset(pResourceDir->VirtualAddress, buffer) + buffer);
+	// Resource sum number
+	DWORD dwResourceNum = pFirst->NumberOfIdEntries + pFirst->NumberOfNamedEntries;
+	// Resource Basic Info
+	PIMAGE_RESOURCE_DIRECTORY_ENTRY pFirstEntry = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(pFirst + 1);
+	printf("Root directory name entry: %04X\n", pFirst->NumberOfNamedEntries);
+	printf("Root directory id entry: %04X\n", pFirst->NumberOfIdEntries);
+
+	// Traversal resouce
+	for (int i = 0; i < dwResourceNum; i++)
+	{
+		// Judge weather a string or not
+		if (pFirstEntry->NameIsString != 1)
+		{
+			// Not String: System resource
+			if (pFirstEntry->Id < 0x10)
+			{
+				// Print in string model
+				printf("Resource Type: %s\n", g_ResType[pFirstEntry->Id]);
+			}
+			else 
+			{
+				// Print in digit model
+				printf("Resource Type: %d\n", g_ResType[pFirstEntry->Id]);
+			}
+		}
+		else
+		{
+			// Is String: Developer resource
+			PIMAGE_RESOURCE_DIR_STRING_U pResName = 
+				(PIMAGE_RESOURCE_DIR_STRING_U)(pFirstEntry->NameOffset + (DWORD)pFirst);
+			wchar_t* EpName = (wchar_t*)malloc((pResName->Length + 1) * sizeof(wchar_t));
+			memset(EpName, 0, sizeof(wchar_t) * (pResName->Length + 1));
+			wcsncpy_s(EpName, pResName->Length + 1, pResName->NameString, pResName->Length);
+			free(EpName);
+		}
+
+		// Judge weather a dirctory resource
+		if (pFirstEntry->DataIsDirectory == 1)
+		{
+			// Directory Resource
+			PIMAGE_RESOURCE_DIRECTORY pSecond = (PIMAGE_RESOURCE_DIRECTORY)(pFirstEntry->OffsetToDirectory +(DWORD)pFirst);
+			// Resource sum number
+			DWORD dwSecondCount = pSecond->NumberOfIdEntries + pSecond->NumberOfNamedEntries;
+			// Resource Basic info structure
+			PIMAGE_RESOURCE_DIRECTORY_ENTRY pSecondEntry = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(pSecond + 1);
+			// Print Selected directory
+			printf("NumberOfNamedEntries: %04X\n", pSecond->NumberOfNamedEntries);
+			printf("NumberOfIdEntries: %04X\n", pSecond->NumberOfIdEntries);
+			// Traversal Resources
+			for (int i = 0; i < dwSecondCount; i++)
+			{
+				if (pSecondEntry->NameIsString != 1)
+				{
+					printf("Id: %d\n", pSecondEntry->Id);
+				}
+				else
+				{
+					PIMAGE_RESOURCE_DIR_STRING_U pResName =
+						(PIMAGE_RESOURCE_DIR_STRING_U)(pSecondEntry->NameOffset + (DWORD)pFirst);
+					wchar_t* pName = (wchar_t*)malloc((pResName->Length + 1) * sizeof(wchar_t));
+					memset(pName, 0, sizeof(wchar_t) * (pResName->Length + 1));
+					wcsncpy_s(pName, pResName->Length + 1, pResName->NameString, pResName->Length);
+					wprintf(L"Name: %s\n\n", pName);
+					free(pName);
+				}
+				// Judge weather a directory
+				if (pSecondEntry->DataIsDirectory == 1)
+				{
+					// Filling data structure
+					PIMAGE_RESOURCE_DIRECTORY pThird = 
+						(PIMAGE_RESOURCE_DIRECTORY)(pSecondEntry->OffsetToDirectory + (DWORD)pFirst);
+					// Filling basic info structure
+					PIMAGE_RESOURCE_DIRECTORY_ENTRY pThirdEntry =
+						(PIMAGE_RESOURCE_DIRECTORY_ENTRY)(pThird + 1);
+					pThirdEntry->Name;
+					// if does not directory
+					if (pThirdEntry->DataIsDirectory != 1)
+					{
+						// Resource table structure
+						PIMAGE_RESOURCE_DATA_ENTRY pStcData = 
+							(PIMAGE_RESOURCE_DATA_ENTRY)(pThirdEntry->OffsetToData + (DWORD)pFirst);
+						char* pResBuf = (char*)(RvaToFileOffset(pStcData->OffsetToData, buffer) + buffer);
+						DWORD StcDataOffset = RvaToFileOffset(pStcData->OffsetToData, buffer);
+						printf("RVA: %08X\n", pStcData->OffsetToData);
+						printf("Offset: %08X\n", StcDataOffset);
+						printf("Size: %08X\n", pStcData->Size);
+					}
+				}
+				pSecondEntry++;
+			}
+			printf("==========================================\n");
+		}
+		pFirstEntry++;
+	}
+}
+
+void DataTable(char* buffer)
+{
+	// MS-DOS Header
+	PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)buffer;
+	// PE Header
+	PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)(pDosHeader->e_lfanew + buffer);
+	// Extend PE Header
+	PIMAGE_OPTIONAL_HEADER pOptHeader = (PIMAGE_OPTIONAL_HEADER)&pNtHeader->OptionalHeader;
+	// Locate debug table in data directory tables
+	PIMAGE_DATA_DIRECTORY pExportDir = pOptHeader->DataDirectory + IMAGE_DIRECTORY_ENTRY_DEBUG;
+	printf("DEBUG RVA: %08X\n Debug Size: %08X\n", pExportDir->VirtualAddress, pExportDir->Size);
+}
 
 
+// Note:
 // VA: Virtual Address (00000000h - 0fffffffh)  = base address + RVA
 // RVA: Relative Virtual Address
 // FOA: File Offset Address
