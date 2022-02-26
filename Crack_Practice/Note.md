@@ -62,7 +62,6 @@ fastcall                ?funname@@YI(ParameterTable)@Z
 xxxxFFFF:
 xxxx is generated random number
 
-
 # Function
 ## Console Program
 main(): contain 3 parameters
