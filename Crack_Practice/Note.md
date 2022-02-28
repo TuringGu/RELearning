@@ -58,19 +58,19 @@ mov ecx,oprd3
 
 ## C
 
-Calling Convention | Decorate Convention
+Calling Convention|Decorate Convention
 --|:--:|--:
-stdcall | \_funname@num
-\_cdecl | \_funname
-fastcall | @\_funname@num
+stdcall|\_funname@num
+\_cdecl|\_funname
+fastcall|@\_funname@num
 
 ## C++
 
-Calling Convention | Decorate Convention
+Calling Convention|Decorate Convention
 --|:--:|--:
-stdcall | ?funname@@YG(ParameterTable)@Z
-\_cdecl | ?funname@@YA(ParameterTable)@Z
-fastcall | ?funname@@YI(ParameterTable)@Z
+stdcall|?funname@@YG(ParameterTable)@Z
+\_cdecl|?funname@@YA(ParameterTable)@Z
+fastcall|?funname@@YI(ParameterTable)@Z
 
 # IDA
 
@@ -88,3 +88,13 @@ main(): contain 3 parameters
 ## Win32 Program
 
 winmain(): contain 4 parameters  
+
+## Virtual Function
+
+`VTBL(Virtual Table List)`
+
+    Fun[2]={fun1address, fun2address}
+    fun1address = the first function address
+    fun2address = the second function address
+    Call[Fun] = call fun1
+    Call[Fun + 4] = call fun2
