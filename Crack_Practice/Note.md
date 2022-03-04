@@ -1,9 +1,16 @@
-## Crack Method
+# Crack Method
 
 1.Modify jump  
 2.modify key value  
 3.Analyze the code  
 4.modify logical code  
+
+
+## Optimization
+
+### Division
+
+In release version, division optimized to multiply
 
 ### Usually
 
@@ -59,7 +66,7 @@ mov ecx,oprd3
 ## C
 
 Calling Convention|Decorate Convention
---|:--:|--:
+---|:---:|---:
 stdcall|\_funname@num
 \_cdecl|\_funname
 fastcall|@\_funname@num
@@ -67,7 +74,7 @@ fastcall|@\_funname@num
 ## C++
 
 Calling Convention|Decorate Convention
---|:--:|--:
+---|:---:|---:
 stdcall|?funname@@YG(ParameterTable)@Z
 \_cdecl|?funname@@YA(ParameterTable)@Z
 fastcall|?funname@@YI(ParameterTable)@Z
@@ -97,4 +104,11 @@ winmain(): contain 4 parameters
     fun1address = the first function address
     fun2address = the second function address
     Call[Fun] = call fun1
-    Call[Fun + 4] = call fun2
+    Call[Fun + 4] = call fun2  
+
+# Ollydbg
+
+## Shortcut
+
+|Ctrl + a|Code analyze|
+

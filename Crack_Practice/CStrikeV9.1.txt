@@ -1,0 +1,73 @@
+Player:
+Bullet Quantity: [server.dll + 004F72FC] + 4B0
+defend: [server.dll + 4F615C] + 4B0
+x: [server.dll + 4F615C] + 280
+z: [server.dll + 4F615C] + 284
+y: [server.dll + 4F615C] + 288
+Blood: [server.dll + 4F615C] + 0E4
+
+Enemy01:
+Bullet Quantity: [server.dll + 4F616C] + 4B0
+defend: [server.dll + 4F616C] + 4B0
+x: [server.dll + 4F616C] + 280
+z: [server.dll + 4F616C] + 284
+y: [server.dll + 4F616C] + 288
+Blood: [server.dll + 4F616C] + 0E4
+
+Enemy02:
+Bullet Quantity: [server.dll + 4F617C] + 4B0
+defend: [server.dll + 4F616C] + 4B0
+x: [server.dll + 4F617C] + 280
+z: [server.dll + 4F617C] + 284
+y: [server.dll + 4F617C] + 288
+Blood: [server.dll + 4F617C] + 0E4
+
+Enemy03:
+Bullet Quantity: [server.dll+4F618C] + 4B0
+defend: [server.dll+4F618C] + 4B0
+x: [server.dll+4F618C] + 280
+z: [server.dll+4F618C] + 284
+y: [server.dll+4F618C] + 288
+Blood: [server.dll+4F618C] + 0E4
+
+
+Corsshair: 
+y: [engine.dll+47C33C]
+x: [engine.dll+47C340]
+
+
+team: [server.dll+4F615C] + 1F4
+terrorist: 2
+anti-terrorist: 3
+
+
+Person Number: 
+[server.dll+4F2150]
+[engine.dll+5EC82C]
+
+
+
+Cheat Code: 
+sv_cheats 1
+bot_add
+bot_stop 1
+
+EAX=00000003
+EBX=0C611A00
+ECX=32EA5428
+EDX=00000000
+ESI=0C611A00
+EDI=32EA5428
+EBP=00AFDFD8
+ESP=00AFDFC8
+EIP=613BAE76
+
+Probable base pointer =32EA5428
+
+613BAE6E - ret 
+613BAE6F - int 3 
+613BAE70 - mov eax,[ecx+000001F4]
+613BAE76 - ret 
+613BAE77 - int 3 
+
+
