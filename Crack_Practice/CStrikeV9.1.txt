@@ -46,28 +46,10 @@ Person Number:
 [engine.dll+5EC82C]
 
 
-
 Cheat Code: 
 sv_cheats 1
 bot_add
 bot_stop 1
 
-EAX=00000003
-EBX=0C611A00
-ECX=32EA5428
-EDX=00000000
-ESI=0C611A00
-EDI=32EA5428
-EBP=00AFDFD8
-ESP=00AFDFC8
-EIP=613BAE76
-
-Probable base pointer =32EA5428
-
-613BAE6E - ret 
-613BAE6F - int 3 
-613BAE70 - mov eax,[ecx+000001F4]
-613BAE76 - ret 
-613BAE77 - int 3 
 
 
