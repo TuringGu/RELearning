@@ -26,6 +26,7 @@ int main()
 			count++;
 			if (count >= 50) 
 			{
+				count = 0;
 				system("pause");
 			}
 		}
